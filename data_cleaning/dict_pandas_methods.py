@@ -1,4 +1,5 @@
 #словарь с методами пандаса и связанные с ним библиотеки
+#from  functools import wraps as wp
 pandas_methods = {
     "json.dump()": "Записывает объект Python в файл в формате JSON",
     "json.dumps()": "Создает JSON-строку из переданного в нее объекта",
@@ -111,6 +112,120 @@ pandas_methods = {
 
 }
 
+eda = {
+"Шаблон применения какой-либо функции ко всем значениям колонки": '''import re
+def clear_price(price):
+    return int(re.sub(\'\\D\', \'\', price))
+dataset[\'Очищенная цена\'] = dataset[\'Цена\'].apply(clear_price)''',
+    "Шаблон сортировки по значению": '''sorted_dataset = dataset.sort_values('Очищенная цена')
+sorted_dataset''',
+    "Импортируем библиотеку визуализации":'''import matplotlib.pyplot as plt''',
+    "Для визуального представления данных в том числе медианы, квартилей и выбросов используем boxplot": '''plt.boxplot(dataset['Номер этажа'])
+plt.show()''',
+    "Альтернативный способ визуализировать колонку - гистограмма":'''plt.hist(dataset['Номер этажа'], bins = 50)
+plt.xlim((None,55)) # для "отрезания" от графика неинформативного
+plt.show()''',
+    "Создание переменной с Series":'''year_of_construction = dataset['Год постройки']''',
+    "Расчет минимального и максимального значения Series":'''max_value = year_of_construction.max()
+min_value = year_of_construction.min()
+print('Максимальный год постройки: ', max_value, 'Минимальный год постройки: ', min_value)''',
+    "Расчет среднего значения Series":'''mean_value = year_of_construction.mean()
+print('Средний год постройки: ', mean_value)''',
+    "Расчет медианы Series":'''median_value = year_of_construction.median()
+print('Медиана года постройки: ', median_value)''',
+    "Расчет 10-го и 25-го процентилей Series":'''percentile_10_value = year_of_construction.quantile(0.10)
+percentile_25_value = year_of_construction.quantile(0.25)
+print('10-й процентиль года постройки: ', percentile_10_value)
+print('25-й процентиль года постройки: ', percentile_25_value)''',
+    "Для расчета всех основных статистических показателей сразу":'''year_of_construction.describe()''',
+    "Неграфический способ проанализировать колонку":'''dataset['Класс жилья'].describe()''',
+    "Более полный неграфический способ":'''class_counts = dataset['Класс жилья'].value_counts()
+class_counts''',
+    "Круговая диаграмма":'''plt.pie(class_counts.values, labels = class_counts.index)
+plt.title('Круговая диаграмма распределения классов квартир') # Добавление подписи к графику
+plt.show()''',
+    "Стобцевая диаграмма":'''type_counts = dataset['Тип здания'].value_counts()
+plt.barh(type_counts.index, type_counts.values)
+plt.title('Столбцовая диаграмма распределения типов здания')
+plt.show()''',
+    "Шаблона первичного анализа взаимосвязи категориальной и числовой колонок":'''dataset.groupby('Класс жилья')["Очищенная цена за м²"].describe()''',
+    "Шаблон визуального анализа взаимосвязи категориальной и числовой колонок":'''import seaborn as sns
+sns.boxplot(x='Класс жилья', y="Очищенная цена за м²", data=dataset)
+plt.axis(ymin=0, ymax=1100000) 
+plt.show()''',
+    "Шаблона анализа взаимосвязи двух и более числовых колонок":'''g = sns.PairGrid(new_dataset[columns])
+g.map(sns.scatterplot, alpha=0.2)''',
+    "Шаблона анализа взаимосвязи двух категориальных колонок":'''import matplotlib.pyplot as plt
+flat_types = dataset['Класс жилья'].unique()
+flat_types = flat_types[1:]
+labels = dataset['Тип здания'].unique()
+colors = dict(zip(labels, plt.cm.tab20.colors[:len(labels)]))
+for flat_type in flat_types: 
+  df = dataset[dataset['Класс жилья']==flat_type] 
+  class_counts = df['Тип здания'].value_counts()
+  labels =class_counts.index
+  plt.title(flat_type)
+  patches, texts = plt.pie(
+      class_counts.values, 
+      labels = labels, 
+      colors = [colors[key] for key in labels],
+      textprops=dict(color="w")
+      )
+  plt.legend(patches, labels, title="Типы здания", loc="upper center", bbox_to_anchor=(1, 0, 0.5, 1)) 
+  plt.show()''',
+    "Шаблон фильтрации по одному значению в колонке":'''filtered_dataset = dataset[dataset['Этап строительства']=='Котлован']''',
+    "Шаблон фильтрации числовой колонки":'''filtered_dataset = dataset[dataset['Год постройки']>2010]''',
+    "Шаблон фильтрации по нескольким значениям в колонке":'''districts = ['Строгино', 'Щукино', 'Хорошёвский']
+filtered_dataset = dataset[dataset['Район'].isin(districts)]''',
+    "Шаблон фильтрации по нескольким колонкам":'''districts = ['Строгино', 'Щукино', 'Хорошёвский']
+filtered_dataset = dataset[(dataset['Район'].isin(districts)) & (dataset['Год постройки']>2010)]''',
+    "Шаблон фильтрации по всем значениям кроме заданных в фильтре":'''districts = ['Строгино', 'Щукино', 'Хорошёвский']
+filtered_dataset = dataset[~(dataset['Район'].isin(districts))]''',
+    "Шаблон взятия элемента по индексу":'''dataset.loc[100]''',
+    "Шаблон взятия среза по промежутку":'''dataset.loc[1000:1002]''',
+    "Шаблон создания нового датасета списку индексов ":'''index_list = [354,1,2]
+dataset.loc[index_list].head()''',
+    "Для не числовых индексов все работает аналогично":'''describe_data = dataset.describe()
+describe_data.loc['max']''',
+    "Шаблон для взятия среза в хаотично пронумеровнном датасете ":'''sorted_dataset = dataset.sort_values('Количество комнат', ascending=False)
+sorted_dataset.iloc[:100]''',
+    "Нестандартная фильтрация с помощью дополнительный функции":'''def is_address_correct(address):
+  return 'Тагильская' in address
+mask = dataset['Адрес'].apply(is_address_correct)
+filtred_dataset = dataset[mask]''',
+    "Шаблон фильтрации числовых колонок":'''dtypes = dataset.dtypes
+num_dtypes = dtypes[dtypes!='object']
+new_columns = num_dtypes.index
+filtred_dataset = dataset[num_dtypes.index]''',
+    "Шаблон взятия среднего значения цены квартир сгруппированных по значениям Этапа строительства  ":'''groups_mean_price = dataset.groupby('Этап строительства')['Очищенная цена'].mean()''',
+    "Шаблон взятия среднего значения цены квартир сгруппированных по значениям колонок Этапа строительства и Класса жилья":'''
+groups_mean_price = dataset.groupby(['Этап строительства', 'Класс жилья'], as_index=False)['Очищенная цена'].mean()
+groups_mean_price['Очищенная цена'] = groups_mean_price['Очищенная цена'].astype(int)''',
+    "Размер шрифта на диаграмме":'''params = {
+          'axes.titlesize': 15,   Размер шрифта главной подписи
+          'xtick.labelsize': 12,  Размер шрифта подписей тикетов оси X
+          'axes.labelsize': 14    Размер шрифта подписей осей
+          }
+plt.rcParams.update(params)''',
+    "Шаблон улучшения графика":'''import matplotlib.pyplot as plt
+type_counts = dataset['Тип здания'].value_counts()
+other_types = type_counts[type_counts<500]
+type_counts = type_counts[type_counts>500]
+type_counts['Другое'] = other_types.sum() # Замена редких значений категорией Другое
+plt.style.use('seaborn') # Смена стиля всех графиков matplotlib
+params = {
+          'axes.titlesize': 15,   # Размер шрифта главной подписи
+          'xtick.labelsize': 12,  # Размер шрифта подписей тикетов оси X
+          'axes.labelsize': 14    # Размер шрифта подписей осей
+          }
+plt.rcParams.update(params) # Фиксация параметров
+plt.ylabel('Количество квартир') # Подпись оси Y
+plt.title('Диаграмма распределения типов здания') # Подпись всего графика
+plt.xticks(rotation=30, ha = 'right') # Поворот на 30 градусов подписей оси X и выравнивание по правому краю
+plt.bar(type_counts.index, type_counts.values, color='#03A9F4') # Кастомизация цвета
+plt.show()''',
+    "50 разных способов создать боксплот/диаграмму/гистаграмму":'''https://habr.com/ru/articles/468295/''',
+                                                                  }
 def search_in(string, dct=pandas_methods):
     '''Функция поиска совпадений по подстроке, можно писать часть названия метода/функции
     или слово/часть слова из описания этой функции/метода'''
@@ -118,10 +233,12 @@ def search_in(string, dct=pandas_methods):
     for name, info in dct.items():
         if string.lower() in name.lower() or string.lower() in info.lower():
             return_list.append({name: info})
-    print(*(return_list), sep='\n'+ max(map(lambda x: len(str(x)), return_list))*'-'+'\n')
-
-#пример поиска по части метода
-search_in('isn')
-#пример поиска по части описания
-search_in('объе')
-
+    print('*'*156)
+    for i in return_list:
+        print(*i)
+        print(*(i.values()), end='\n'+156 * '-'+'\n')
+# end='\n'+ max(map(lambda x: len(str(x)), return_list))*'-'+'\n'
+#пример поиска в разведочном анализе
+search_in('срез',eda)
+#пример поиска в пандасе
+search_in('чтен')
