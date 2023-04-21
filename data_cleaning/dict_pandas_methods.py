@@ -1,5 +1,4 @@
 #словарь с методами пандаса и связанные с ним библиотеки
-#from  functools import wraps as wp
 pandas_methods = {
     "json.dump()": "Записывает объект Python в файл в формате JSON",
     "json.dumps()": "Создает JSON-строку из переданного в нее объекта",
@@ -111,7 +110,7 @@ pandas_methods = {
     "df[['age', 'marital']]": "несколько столбцов"
 
 }
-
+# словарь с шаблонами eda
 eda = {
 "Шаблон применения какой-либо функции ко всем значениям колонки": '''import re
 def clear_price(price):
@@ -238,7 +237,9 @@ def search_in(string, dct=pandas_methods):
         print(*i)
         print(*(i.values()), end='\n'+156 * '-'+'\n')
 # end='\n'+ max(map(lambda x: len(str(x)), return_list))*'-'+'\n'
+# запросы разделены *, примеры разделены -
 #пример поиска в разведочном анализе
 search_in('срез',eda)
 #пример поиска в пандасе
 search_in('чтен')
+
