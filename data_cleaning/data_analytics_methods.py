@@ -224,6 +224,7 @@ plt.xticks(rotation=30, ha = 'right') # Поворот на 30 градусов 
 plt.bar(type_counts.index, type_counts.values, color='#03A9F4') # Кастомизация цвета
 plt.show()''',
     "50 разных способов создать боксплот/диаграмму/гистаграмму":'''https://habr.com/ru/articles/468295/''',
+    "plt.ylim((None,40))":'''для "отрезания" от графика неинформативного'''
                                                                   }
 def search_in(string, dct=pandas_methods):
     '''Функция поиска совпадений по подстроке, можно писать часть названия метода/функции
